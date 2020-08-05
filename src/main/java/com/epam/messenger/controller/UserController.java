@@ -42,10 +42,8 @@ public class UserController {
     }
 
     @GetMapping("/user")
-    public ContactDTO findContactByPhoneNumber(@RequestParam final String phoneNumber) {
-        logger.info("findContactByPhoneNumber: phoneNumber = " + phoneNumber);
-        ContactDTO contactDTO = userService.findByPhoneNumber(phoneNumber);
-        logger.info("RESPONSE: " + contactDTO);
-        return contactDTO;
+    public ContactDTO findContactByPhoneNumber(@RequestParam final String phoneNumber, @RequestParam final Integer userId) {
+        userService.addContactToUser(userId, phoneNumber);
+        return userService.findByPhoneNumber(phoneNumber);
     }
 }

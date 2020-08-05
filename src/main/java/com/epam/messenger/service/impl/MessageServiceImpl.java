@@ -19,8 +19,4 @@ public class MessageServiceImpl implements MessageService {
     public Message addMessage(final Message message) {
         return messageRepository.save(message);
     }
-
-    public Message findById(final Integer messageId) {
-        return messageRepository.findById(messageId).get();
-    }
 }

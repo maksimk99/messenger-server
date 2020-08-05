@@ -1,7 +1,6 @@
 package com.epam.messenger.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +19,7 @@ import java.sql.Timestamp;
 @Setter
 @Entity
 public class Message {
-    @TableGenerator(name = "Message_Gen", initialValue = 18)
+    @TableGenerator(name = "Message_Gen", initialValue = 19)
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "Message_Gen")
     private Integer messageId;
