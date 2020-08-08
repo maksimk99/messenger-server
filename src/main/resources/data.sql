@@ -3,13 +3,13 @@ INSERT INTO chat (chat_id, avatar_url, chat_name) VALUES (2, 'assets/icon/camera
 INSERT INTO chat (chat_id, avatar_url, chat_name) VALUES (3, 'assets/icon/camera.png', 'thirdChat');
 INSERT INTO chat (chat_id, avatar_url, chat_name) VALUES (4, 'assets/icon/camera.png', 'forthChat');
 
-INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen)  VALUES (1, 'https://pickaface.net/gallery/avatar/Shahin_Hanafi5775381770e1f.png', 'Alexei Stephanov', 'password', '+375 33 664-87-13', '2020-07-04 10:11:05');
-INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen) VALUES (2, 'https://pickaface.net/gallery/avatar/20151205_194059_2696_Chat.png', 'Maksimiliyan Katuranau', '16111999m', '+375 33 664-87-14', '2020-07-04 10:11:05');
-INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen)  VALUES (3, 'https://pickaface.net/gallery/avatar/20151205_194059_2696_Chat.png', 'Mark Shulgan', 'password', '+375 33 664-87-12', '2020-07-03 12:11:05');
-INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen)  VALUES (4, 'https://pickaface.net/gallery/avatar/20151205_194059_2696_Chat.png', 'Pavel Kachurka', 'password', '+375 33 664-87-11', '2020-07-04 09:25:05');
-INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen)  VALUES (5, 'https://techday24.com/wp-content/uploads/2020/05/Facebook-avatar-2020-2.jpg', 'Алина Концевич', 'password', '+375 33 664-87-10', '2020-07-02 15:33:05');
-INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen)  VALUES (6, 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQKYgIpJ-RRcHnyQcXwfWUNtzEHLURfUm9NRqaqYyNXpr1cTQze&usqp=CAU', 'Даниил Федорович', 'password', '+375 33 664-87-09', '2020-07-04 20:20:05');
-INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen)  VALUES (7, 'https://vignette.wikia.nocookie.net/avatar/images/8/85/Royal_messenger.png/revision/latest/top-crop/width/360/height/360?cb=20140510204457', 'Марк Никитков', 'password', '+375 33 664-87-08', '2020-07-04 20:20:05');
+INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen)  VALUES (1, null, 'Alexei Stephanov', 'password', '+375 33 664-87-13', '2020-07-04 10:11:05');
+INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen) VALUES (2, null, 'Maksimiliyan Katuranau', '16111999m', '+375 33 664-87-14', '2020-07-04 10:11:05');
+INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen)  VALUES (3, null, 'Mark Shulgan', 'password', '+375 33 664-87-12', '2020-07-03 12:11:05');
+INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen)  VALUES (4, null, 'Pavel Kachurka', 'password', '+375 33 664-87-11', '2020-07-04 09:25:05');
+INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen)  VALUES (5, null, 'Алина Концевич', 'password', '+375 33 664-87-10', '2020-07-02 15:33:05');
+INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen)  VALUES (6, null, 'Даниил Федорович', 'password', '+375 33 664-87-09', '2020-07-04 20:20:05');
+INSERT INTO user (user_id, avatar_url, user_name , password, phone_number, last_seen)  VALUES (7, null, 'Марк Никитков', 'password', '+375 33 664-87-08', '2020-07-04 20:20:05');
 
 INSERT INTO chat_has_members (chat_id, member_id) VALUES (1, 1);
 INSERT INTO chat_has_members (chat_id, member_id) VALUES (1, 2);

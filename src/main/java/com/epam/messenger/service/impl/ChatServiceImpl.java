@@ -8,15 +8,12 @@ import com.epam.messenger.rabbitmq.RabbitMQManager;
 import com.epam.messenger.repository.ChatRepository;
 import com.epam.messenger.repository.UserRepository;
 import com.epam.messenger.service.ChatService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,10 +21,10 @@ import java.util.stream.Collectors;
 @Service
 public class ChatServiceImpl implements ChatService {
 
-    Logger logger = LoggerFactory.getLogger(ChatServiceImpl.class);
-
     @Value("${conversation.incoming.exchange.name}")
     private String CONVERSATION_INCOMING_EXCHANGE_NAME;
+    @Value("${chat.routing.key.prefix}")
+    private String CHAT_ROUTING_KEY_PREFIX;
 
     private final RabbitMQManager rabbitMQManager;
     private final ChatRepository chatRepository;
@@ -36,7 +33,8 @@ public class ChatServiceImpl implements ChatService {
 
     @Autowired
     public ChatServiceImpl(final ChatRepository chatRepository, final RabbitMQManager rabbitMQManager,
-                           final UserRepository userRepository, final RabbitTemplate rabbitTemplate) {
+                           final UserRepository userRepository,
+                           final RabbitTemplate rabbitTemplate) {
         this.rabbitMQManager = rabbitMQManager;
         this.chatRepository = chatRepository;
         this.userRepository = userRepository;
@@ -51,22 +49,19 @@ public class ChatServiceImpl implements ChatService {
         return chatRepository.findChatsByUsersUserId(userId).stream().map(ChatDTO::build).collect(Collectors.toList());
     }
 
-    public Integer creatChat(final ChatDTO chatDTO) {
-        logger.info("convert to chat: " + chatDTO);
+    public ChatDTO creatChat(final ChatDTO chatDTO) {
         Chat chat = saveChat(chatDTO);
         List<Integer> chatMembers = chatDTO.getMembers();
-        if (chat.getChatId() != null) {
-            for (Integer chatMember : chatMembers) {
-                rabbitMQManager.createBinding(chatMember, chat.getChatId());
-                addMembersOfChatToUserContacts(chatMember, chatMembers);
-            }
-            rabbitTemplate.convertAndSend(CONVERSATION_INCOMING_EXCHANGE_NAME, "chat" + chat.getChatId(),
-                    ChatBrokerDTO.build(chat), message -> {
-                        message.getMessageProperties().getHeaders().put("messageType", "chat");
-                        return message;
-                    });
+        for (Integer chatMember : chatMembers) {
+            rabbitMQManager.bindChatToUser(chatMember, chat.getChatId());
+            addMembersOfChatToUserContacts(chatMember, chatMembers);
         }
-        return chat.getChatId();
+        rabbitTemplate.convertAndSend(CONVERSATION_INCOMING_EXCHANGE_NAME, CHAT_ROUTING_KEY_PREFIX + chat.getChatId(),
+                ChatBrokerDTO.build(chat), message -> {
+                    message.getMessageProperties().getHeaders().put("messageType", "chat");
+                    return message;
+                });
+        return ChatDTO.build(chat);
     }
 
     private Chat saveChat(final ChatDTO chatDTO) {
@@ -84,6 +79,7 @@ public class ChatServiceImpl implements ChatService {
         chatMembersId.remove(userId);
         if (chatMembersId.size() > 0) {
             for(Integer memberId: chatMembersId) {
+                rabbitMQManager.bindContactToUser(userId, memberId);
                 user.getContacts().add(new User().setUserId(memberId));
             }
             userRepository.save(user);

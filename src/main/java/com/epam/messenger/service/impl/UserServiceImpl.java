@@ -10,7 +10,9 @@ import com.epam.messenger.rabbitmq.RabbitMQManager;
 import com.epam.messenger.repository.UserRepository;
 import com.epam.messenger.service.ChatService;
 import com.epam.messenger.service.UserService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,16 +21,23 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserService {
 
+    @Value("${user.info.exchange.name}")
+    private String USER_INFO_EXCHANGE_NAME;
+    @Value("${user.info.routing.key.prefix}")
+    private String USER_INFO_ROUTING_KEY_PREFIX;
+
     private final UserRepository userRepository;
     private final ChatService chatService;
     private final RabbitMQManager rabbitMQManager;
+    private final RabbitTemplate rabbitTemplate;
 
     @Autowired
     public UserServiceImpl(final UserRepository userRepository, final ChatService chatService,
-                           final RabbitMQManager rabbitMQManager) {
+                           final RabbitMQManager rabbitMQManager, final RabbitTemplate rabbitTemplate) {
         this.userRepository = userRepository;
         this.chatService = chatService;
         this.rabbitMQManager = rabbitMQManager;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     public User findById(final Integer userId) {
@@ -39,10 +48,19 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByPhoneNumber(phoneNumber.replaceFirst(" ", "+")).map(ContactDTO::build).orElse(null);
     }
 
-    public void addContactToUser(final Integer userId, final String contactPhoneNumber) {
-        User user = userRepository.findByUserId(userId).get();
-        user.getContacts().add(userRepository.findByPhoneNumber(contactPhoneNumber.replaceFirst(" ", "+")).get());
-        userRepository.save(user);
+    public ContactDTO addContactToUser(final Integer userId, final String contactPhoneNumber) {
+
+        Optional<User> contactOptional = userRepository.findByPhoneNumber(contactPhoneNumber.replaceFirst(" ", "+"));
+        if (contactOptional.isPresent()) {
+            User contact = contactOptional.get();
+            User user = userRepository.findByUserId(userId).get();
+            user.getContacts().add(contact);
+            userRepository.save(user);
+            rabbitMQManager.bindContactToUser(userId, contact.getUserId());
+            return ContactDTO.build(contact);
+        } else {
+            return null;
+        }
     }
 
     public LoginUserResponseDTO login(final LoginUserDTO loginUserDTO) {
@@ -64,5 +82,23 @@ public class UserServiceImpl implements UserService {
             rabbitMQManager.createExchange(userId);
             return userId;
         }
+    }
+
+    public User updateUserInfo(final Integer userId, final String userName) {
+        boolean isUserDataWasUpdated = false;
+        User user = userRepository.findByUserId(userId).get();
+        if (userName != null) {
+            isUserDataWasUpdated = true;
+            user.setUserName(userName);
+        }
+        if (isUserDataWasUpdated) {
+            userRepository.save(user);
+            rabbitTemplate.convertAndSend(USER_INFO_EXCHANGE_NAME, USER_INFO_ROUTING_KEY_PREFIX + userId,
+                    ContactDTO.build(user), message -> {
+                        message.getMessageProperties().getHeaders().put("messageType", "userInfo");
+                        return message;
+                    });
+        }
+        return user;
     }
 }

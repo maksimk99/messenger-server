@@ -1,21 +1,18 @@
 package com.epam.messenger.controller;
 
-import com.epam.messenger.model.Chat;
-import com.epam.messenger.model.Message;
-import com.epam.messenger.model.User;
 import com.epam.messenger.model.dto.ChatBrokerDTO;
 import com.epam.messenger.model.dto.ChatDTO;
 import com.epam.messenger.model.dto.MessageDTO;
 import com.epam.messenger.service.ChatService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Timestamp;
@@ -27,17 +24,19 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
-    private RabbitTemplate template;
+    private final RabbitTemplate template;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public ChatController(final ChatService chatService, final RabbitTemplate template) {
+    public ChatController(final ChatService chatService, final RabbitTemplate template, final ObjectMapper objectMapper) {
         this.chatService = chatService;
         this.template = template;
+        this.objectMapper = objectMapper;
     }
 
     @PostMapping("/chat/create")
-    public Integer createChat(@RequestBody ChatDTO chatDTO) {
-        return chatService.creatChat(chatDTO);
+    public ChatDTO createChat(@RequestParam(value = "chatDTO") String chatDTO) throws JsonProcessingException {
+        return chatService.creatChat(objectMapper.readValue(chatDTO, ChatDTO.class));
     }
 
     @GetMapping("/test/message/{chatId}/{senderId}/{message}")
@@ -55,7 +54,7 @@ public class ChatController {
         ChatDTO chatDTO = new ChatDTO();
         chatDTO.setChatName(chatName);
         chatDTO.setMembers(List.of(1, 2, 4, 6));
-        Integer chatId = chatService.creatChat(chatDTO);
+        Integer chatId = chatService.creatChat(chatDTO).getChatId();
         return ChatBrokerDTO.build(chatService.findById(chatId));
     }
 

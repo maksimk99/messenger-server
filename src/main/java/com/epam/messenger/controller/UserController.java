@@ -1,5 +1,6 @@
 package com.epam.messenger.controller;
 
+import com.epam.messenger.model.User;
 import com.epam.messenger.model.dto.ContactDTO;
 import com.epam.messenger.model.dto.LoginUserDTO;
 import com.epam.messenger.model.dto.LoginUserResponseDTO;
@@ -10,12 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@CrossOrigin(origins = "http://192.168.43.125:8100")
+@CrossOrigin
 @RestController
 public class UserController {
 
@@ -43,7 +45,12 @@ public class UserController {
 
     @GetMapping("/user")
     public ContactDTO findContactByPhoneNumber(@RequestParam final String phoneNumber, @RequestParam final Integer userId) {
-        userService.addContactToUser(userId, phoneNumber);
-        return userService.findByPhoneNumber(phoneNumber);
+        return userService.addContactToUser(userId, phoneNumber);
+    }
+
+    @PostMapping("/user/{userId}/update")
+    public User updateUserInfo(@PathVariable Integer userId,
+                               @RequestParam(value = "userName", required = false) String userName) {
+        return userService.updateUserInfo(userId, userName);
     }
 }

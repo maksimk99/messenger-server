@@ -14,12 +14,18 @@ public class RabbitMqConfig {
 
     @Value("${conversation.incoming.exchange.name}")
     private String CONVERSATION_INCOMING_EXCHANGE_NAME;
+    @Value("${user.info.exchange.name}")
+    private String USER_INFO_EXCHANGE_NAME;
 
     @Bean(name = "conversationIncoming")
     public TopicExchange conversationIncoming() {
         return new TopicExchange(CONVERSATION_INCOMING_EXCHANGE_NAME);
     }
 
+    @Bean(name = "userInfo")
+    public TopicExchange userInfo() {
+        return new TopicExchange(USER_INFO_EXCHANGE_NAME);
+    }
     @Bean
     public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
