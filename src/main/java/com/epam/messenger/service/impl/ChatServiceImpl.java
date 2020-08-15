@@ -8,10 +8,12 @@ import com.epam.messenger.rabbitmq.RabbitMQManager;
 import com.epam.messenger.repository.ChatRepository;
 import com.epam.messenger.repository.UserRepository;
 import com.epam.messenger.service.ChatService;
+import com.epam.messenger.service.FileWriter;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,15 +31,17 @@ public class ChatServiceImpl implements ChatService {
     private final RabbitMQManager rabbitMQManager;
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
+    private final FileWriter fileWriter;
     private final RabbitTemplate rabbitTemplate;
 
     @Autowired
     public ChatServiceImpl(final ChatRepository chatRepository, final RabbitMQManager rabbitMQManager,
-                           final UserRepository userRepository,
+                           final UserRepository userRepository, final FileWriter fileWriter,
                            final RabbitTemplate rabbitTemplate) {
         this.rabbitMQManager = rabbitMQManager;
         this.chatRepository = chatRepository;
         this.userRepository = userRepository;
+        this.fileWriter = fileWriter;
         this.rabbitTemplate = rabbitTemplate;
     }
 
@@ -49,8 +53,8 @@ public class ChatServiceImpl implements ChatService {
         return chatRepository.findChatsByUsersUserId(userId).stream().map(ChatDTO::build).collect(Collectors.toList());
     }
 
-    public ChatDTO creatChat(final ChatDTO chatDTO) {
-        Chat chat = saveChat(chatDTO);
+    public ChatDTO creatChat(final ChatDTO chatDTO, final MultipartFile file) {
+        Chat chat = saveChat(chatDTO, file);
         List<Integer> chatMembers = chatDTO.getMembers();
         for (Integer chatMember : chatMembers) {
             rabbitMQManager.bindChatToUser(chatMember, chat.getChatId());
@@ -64,7 +68,10 @@ public class ChatServiceImpl implements ChatService {
         return ChatDTO.build(chat);
     }
 
-    private Chat saveChat(final ChatDTO chatDTO) {
+    private Chat saveChat(final ChatDTO chatDTO, final MultipartFile file) {
+        if (file != null) {
+            chatDTO.setAvatarUrl(fileWriter.writeFile(file));
+        }
         Chat chat = chatDTO.convertToChat();
         chat.setUsers(chatDTO.getMembers().stream().map(userId -> userRepository.findById(userId).get())
                 .collect(Collectors.toList()));

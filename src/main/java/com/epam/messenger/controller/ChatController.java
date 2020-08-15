@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -35,8 +37,9 @@ public class ChatController {
     }
 
     @PostMapping("/chat/create")
-    public ChatDTO createChat(@RequestParam(value = "chatDTO") String chatDTO) throws JsonProcessingException {
-        return chatService.creatChat(objectMapper.readValue(chatDTO, ChatDTO.class));
+    public ChatDTO createChat(@RequestPart(value = "file", required = false) MultipartFile file,
+                              @RequestParam(value = "chatDTO") String chatDTO) throws JsonProcessingException {
+        return chatService.creatChat(objectMapper.readValue(chatDTO, ChatDTO.class), file);
     }
 
     @GetMapping("/test/message/{chatId}/{senderId}/{message}")
@@ -54,7 +57,7 @@ public class ChatController {
         ChatDTO chatDTO = new ChatDTO();
         chatDTO.setChatName(chatName);
         chatDTO.setMembers(List.of(1, 2, 4, 6));
-        Integer chatId = chatService.creatChat(chatDTO).getChatId();
+        Integer chatId = chatService.creatChat(chatDTO, null).getChatId();
         return ChatBrokerDTO.build(chatService.findById(chatId));
     }
 

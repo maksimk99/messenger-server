@@ -11,5 +11,5 @@ public interface ChatService {
 
     List<ChatDTO> findUserChats(Integer userId);
 
-    ChatDTO creatChat(ChatDTO chatDTO);
+    ChatDTO creatChat(ChatDTO chatDTO, MultipartFile file);
 }

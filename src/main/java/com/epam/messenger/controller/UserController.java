@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @CrossOrigin
 @RestController
@@ -48,9 +49,10 @@ public class UserController {
         return userService.addContactToUser(userId, phoneNumber);
     }
 
-    @PostMapping("/user/{userId}/update")
+    @PostMapping("/user/{userId}/avatar/update")
     public User updateUserInfo(@PathVariable Integer userId,
+                               @RequestParam(value = "file", required = false) MultipartFile file,
                                @RequestParam(value = "userName", required = false) String userName) {
-        return userService.updateUserInfo(userId, userName);
+        return userService.updateUserInfo(userId, file, userName);
     }
 }

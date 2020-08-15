@@ -18,5 +18,5 @@ public interface UserService {
 
     Integer register(RegisterUserDTO registerUserDTO);
 
-    User updateUserInfo(Integer userId, String userName);
+    User updateUserInfo(Integer userId, MultipartFile file, String userName);
 }
